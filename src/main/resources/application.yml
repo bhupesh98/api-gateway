@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/spring-microservices-security-realm
+server:
+  port: 6000
+
+
+## Service URLs
+service:
+  product:
+    url: http://localhost:5000
+  order:
+    url: http://localhost:5001
+  inventory:
+    url: http://localhost:5002
+
+
+## SpringDoc Configuration
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Product Service
+        url: /aggregate/product-service/v3/api-docs
+        display-name: Product Service API
+
+      - name: Order Service
+        url: /aggregate/order-service/v3/api-docs
+        display-name: Order Service API
+
+      - name: Inventory Service
+        url: /aggregate/inventory-service/v3/api-docs
+        display-name: Inventory Service API
+  api-docs:
+    path: /api-docs
+
+
+## Actuator Endpoints
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: *
+  endpoint:
+    health:
+      show-details: always
+
+## Resilience4J
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        register-health-indicator: true
+        sliding-window-type: count_based
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        minimum-number-of-calls: 5
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 3s
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 2s
